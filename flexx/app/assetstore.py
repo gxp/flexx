@@ -473,7 +473,7 @@ class Asset:
             except Exception as err:
                 raise ValueError('Asset %r cannot convert %r to JS:\n%s' %
                                  (self.name, ob, str(err)))
-            names.extend(list(parser.vars))
+            names.extend(list(parser.vars))  # todo: only defined vars
             self._need_pyscript_std = True
         elif isjs and callable(ob):
             try:

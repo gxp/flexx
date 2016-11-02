@@ -65,13 +65,21 @@ class NameSpace(dict):
     """
     
     def set_nonlocal(self, key):
+        """ Explicitly declare a name as nonlocal """
         self[key] = False  # also if already exists
     
-    def add(self, key):
+    def use(self, key):
+        """ Declare a name as used (but can be defined in higher level) """
         if key not in self:
+            self[key] = False
+    
+    def add(self, key):
+        """ Declare a name as defined in this namespace """
+        if not self.get(key, False):
             self[key] = True
     
     def discard(self, key):
+        """ Discard name from this namespace """
         self.pop(key, None)
 
 
@@ -259,7 +267,13 @@ class Parser0:
     def pop_stack(self):
         """ Pop the current stack and return the namespace.
         """
+        # Pop
         nstype, nsname, ns = self._stack.pop(-1)
+        # Leak used-but-not-defined vars into the previous stack
+        for name in list(ns):
+            if not ns[name]:
+                self.vars.use(name)
+                ns.discard(name)
         return ns
     
     def get_declarations(self, ns):
